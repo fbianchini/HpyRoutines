@@ -281,16 +281,23 @@ def ThrowCircleMasksOnTheSky(radius, mask=None, nside=2048, overlap=0.1, overlap
     else:
         return full_mask
 	
-def filter_highpass_1d(reclen, lmin, dl):
+def filter_bandpass_1d(reclen, lmin, lmax, dl):
     # central_freq = samp_freq/float(reclen)
     l = np.arange(reclen)#/2+1) * central_freq
     filt = np.ones(reclen)
-    filt[l<lmin-dl/2] = 0.0
 
+    filt[l<lmin-dl/2] = 0.0
     window_for_transition_to_zero = (lmin-dl/2 <= l) * (l <= lmin+dl/2)
-    ind=np.where(window_for_transition_to_zero==True)[0]
+    ind = np.where(window_for_transition_to_zero==True)[0]
     reclen_transition_window = len(filt[window_for_transition_to_zero])
     filt[window_for_transition_to_zero] = (1. - np.cos( np.pi* np.arange(reclen_transition_window) /(reclen_transition_window-1))) /2.0
+
+    filt[l>lmax+dl/2] = 0.0
+
+    window_for_transition_to_zero = (lmax-dl/2 <= l) * (l <= lmax+dl/2)
+    ind = np.where((window_for_transition_to_zero==True))[0]
+    reclen_transition_window = len(filt[window_for_transition_to_zero])
+    filt[window_for_transition_to_zero] = (1. + np.cos( np.pi* np.arange(reclen_transition_window) /(reclen_transition_window-1))) /2.0
 
     return filt
 
