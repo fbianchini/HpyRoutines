@@ -3,26 +3,26 @@ import healpy as hp
 
 arcmin2rad = np.pi / 180. / 60. 
 
-def correctTheta(theta):
-    if theta < 0.:
-        return -theta
-    if theta > np.pi:
-        return 2 * np.pi - theta
-    return theta
+# def correctTheta(theta):
+#     if theta < 0.:
+#         return -theta
+#     if theta > np.pi:
+#         return 2 * np.pi - theta
+#     return theta
 
 
-def cosApodization(sigma, x):
-   if x > sigma:
-       return 1
-   return 1 - np.cos(np.pi * x / (2 * sigma))
+# def cosApodization(sigma, x):
+#    if x > sigma:
+#        return 1
+#    return 1 - np.cos(np.pi * x / (2 * sigma))
 
-def gaussApodization(sigma, x):
-   if x > sigma:
-       return 1
-    # check(sigma > 0, "invalid sigma = " << sigma);
-    return 1 - np.exp(- 9 * x * x / (2 * sigma * sigma))
+# def gaussApodization(sigma, x):
+#    if x > sigma:
+#        return 1
+#     # check(sigma > 0, "invalid sigma = " << sigma);
+#     return 1 - np.exp(- 9 * x * x / (2 * sigma * sigma))
 
-# def apodize(angle, Healpix_Map<double>& result, type) const
+# # def apodize(angle, Healpix_Map<double>& result, type) const
 #     check(type >= COSINE_APODIZATION && type < APODIZATION_TYPE_MAX, "invalid apodization type");
 #     check(angle > 0, "invalid angle = " << angle);
 

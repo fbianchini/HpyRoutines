@@ -88,7 +88,7 @@ def GetCountsMap(sky1, sky2, nside, coord='G', nest=False, rad=False, sqdeg=Fals
 	counts_map = np.bincount(pix, minlength=hp.nside2npix(nside))*1.
 
 	if sqdeg:
-		counts_map *= hp.nside2pixarea(nside)
+		counts_map *= hp.nside2pixarea(nside, degrees=True)
 
 	return counts_map
 
@@ -443,7 +443,6 @@ def GetCorrMaps(clxy, clxx, clyy, nside, lmax=None, pixwin=True):
 
 	return map_xx, map_yy
 
-
 def GetNlgg(counts, mask=None, lmax=None, return_ngal=False):
 	"""
 	Returns galaxy shot-noise spectra given a number counts Healpix map. 
@@ -491,3 +490,43 @@ def GetNlgg(counts, mask=None, lmax=None, return_ngal=False):
 		return np.ones(lmax+1) / ngal, ngal
 	else:
 		return np.ones(lmax+1) / ngal
+
+def GetCountsTot(delta, ngal, dim='pix', clip=True):
+    """
+    Returns total galaxy *counts* map (signal + poisson noise) given an overdensity 
+    *delta* = (n-ngal)/ngal Healpix map and mean galaxy density ngal (in gal/pix).
+    """
+    if dim == 'ster':
+        ngal = ngal*hp.nside2pixarea(hp.npix2nside(delta.size))
+    # elif dim == 'arcmin':
+        # ngal = ngal/hp.nside2pixarea(hp.npix2nside(delta.size), degrees=True)/0.000278 # Sq. deg -> Sq. arcmin
+
+    # Delta has to be > -1
+    if clip:
+	    delta[delta < -1.] = -1.
+
+    return np.random.poisson(lam=ngal*(1.+delta)) * 1.
+
+def GetGalNoiseMap(nside, ngal, dim='pix', delta=False):
+    '''
+    Returns (poissonian) noise *counts* galaxy map given a mean galaxy density.
+    If delta = True, it returns the noise *overdensity* galaxy map.
+    '''
+    if dim == 'ster':
+        ngal = ngal*hp.nside2pixarea(nside)
+
+    npix   = hp.nside2npix(nside)
+    sigma2 = 1./ngal
+
+    # Creating the galaxy noise map
+    map_ngg = np.random.poisson(lam=1./sigma2, size=npix)
+    
+    # Converting it to density contrast map
+    if delta:
+        nbar = np.mean(map_ngg)
+        map_ngg = (map_ngg - nbar)/nbar
+        map_ngg[map_ngg < -1.] = -1.
+
+    return map_ngg
+
+    
